@@ -20,6 +20,7 @@ import { buildKicadPcm } from "./build-kicad-pcm"
 import { buildPreviewGltf } from "./build-preview-gltf"
 import type { BuildFileResult } from "./build-preview-images"
 import { buildPreviewImages } from "./build-preview-images"
+import { createKicadProjectZip } from "./create-kicad-project-zip"
 import {
   type DrcIgnoreCounts,
   formatIgnoredDrcCounts,
@@ -157,6 +158,10 @@ export const registerBuild = (program: Command) => {
     .option(
       "--kicad-project",
       "Generate KiCad project directories for each successful build output",
+    )
+    .option(
+      "--kicad-project-zip",
+      "Generate KiCad project ZIP files alongside each dist/*/kicad directory",
     )
     .option("--kicad-library", "Generate KiCad library in dist/kicad-library")
     .option(
@@ -321,7 +326,9 @@ export const registerBuild = (program: Command) => {
           []
 
         const shouldGenerateKicadProject =
-          resolvedOptions?.kicadProject || resolvedOptions?.kicadLibrary
+          resolvedOptions?.kicadProject ||
+          resolvedOptions?.kicadProjectZip ||
+          resolvedOptions?.kicadLibrary
 
         const injectedProps = parseInjectedProps({
           injectProps: resolvedOptions?.injectProps,
@@ -728,6 +735,22 @@ export const registerBuild = (program: Command) => {
           fs.writeFileSync(path.join(distDir, "index.html"), indexHtml)
         }
 
+        if (resolvedOptions?.kicadProjectZip) {
+          for (const project of kicadProjects) {
+            const outputZipPath = path.join(
+              path.dirname(project.outputDir),
+              "kicad.zip",
+            )
+            await createKicadProjectZip({
+              projectDir: project.outputDir,
+              outputZipPath,
+            })
+            console.log(
+              `  KiCad project ZIP generated at ${kleur.dim(path.relative(process.cwd(), outputZipPath))}`,
+            )
+          }
+        }
+
         if (resolvedOptions?.kicadLibrary) {
           console.log("Generating KiCad library...")
           // Find the main library entrypoint for KiCad library generation
@@ -845,6 +868,7 @@ export const registerBuild = (program: Command) => {
           resolvedOptions?.schematicOnly && "schematic-only",
           resolvedOptions?.glbs && "glbs",
           resolvedOptions?.kicadProject && "kicad-project",
+          resolvedOptions?.kicadProjectZip && "kicad-project-zip",
           resolvedOptions?.kicadLibrary && "kicad-library",
           resolvedOptions?.kicadPcm && "kicad-pcm",
           resolvedOptions?.previewGltf && "preview-gltf",

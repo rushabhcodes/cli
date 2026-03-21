@@ -27,6 +27,7 @@ export const projectConfigSchema = z.object({
     .object({
       circuitJson: z.boolean().optional(),
       kicadProject: z.boolean().optional(),
+      kicadProjectZip: z.boolean().optional(),
       kicadLibrary: z.boolean().optional(),
       kicadPcm: z.boolean().optional(),
       previewImages: z.boolean().optional(),

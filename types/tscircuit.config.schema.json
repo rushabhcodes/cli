@@ -99,6 +99,10 @@
           "type": "boolean",
           "description": "Enable KiCad project output (.kicad_pro, .kicad_sch, .kicad_pcb) in build."
         },
+        "kicadProjectZip": {
+          "type": "boolean",
+          "description": "Enable KiCad project ZIP output alongside each generated KiCad project in build."
+        },
         "kicadLibrary": {
           "type": "boolean",
           "description": "Enable KiCad library output in build."
